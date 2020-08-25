@@ -10,12 +10,15 @@ def make_stage(filters_in, kernel):
     return nn.Sequential(
             nn.Conv2d(filters_in, filters_in*2, kernel),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
+            nn.AvgPool2d(2, 2),
     )
 
-# That's pretty good
+# With max pooling
 # Epoch: 200, Batch: 50, Avg. Loss: 0.00589
 # lr=1.e-4
+# And with avg pooling
+# Loss over test set = 0.00452
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -25,7 +28,7 @@ class Net(nn.Module):
             nn.Conv2d(1, 32, 5, stride=1, bias=False),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2)
+            nn.AvgPool2d(2, 2)
         )
 
         self.convnet = nn.Sequential(
