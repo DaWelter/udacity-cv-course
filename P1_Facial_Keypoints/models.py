@@ -8,37 +8,35 @@ import torch.nn.init as I
 
 def make_stage(filters_in, kernel):
     return nn.Sequential(
-            nn.Conv2d(filters_in, filters_in*2, kernel),
+            nn.Conv2d(filters_in, filters_in*2, kernel, padding=1, padding_mode='replicate'),
             nn.ReLU(),
             nn.AvgPool2d(2, 2),
     )
 
-# With max pooling
-# Epoch: 200, Batch: 50, Avg. Loss: 0.00589
 # lr=1.e-4
-# And with avg pooling
-# Loss over test set = 0.00452
-
+# 400 epochs:
+# Loss over test set = 0.00256
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Output 68x2
         # Input 192
         self.initial_stage = nn.Sequential(
-            nn.Conv2d(1, 32, 5, stride=1, bias=False),
+            nn.Conv2d(1, 32, 5, stride=1, padding=2, bias=False, padding_mode='replicate'),
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.AvgPool2d(2, 2)
         )
 
         self.convnet = nn.Sequential(
-            make_stage(32, 3), # 92+2 = 94
-            make_stage(64, 3), # 44+2 = 46
-            make_stage(128, 3), # 20+2 = 22
-            make_stage(256, 3), # 8+2 = 10
+            make_stage(32, 3),
+            make_stage(64, 3),
+            make_stage(128, 3),
+            make_stage(256, 3),
+            make_stage(512, 3),
         )
 
-        self.dense1 = nn.Linear(512*4*4, 1024)
+        self.dense1 = nn.Linear(1024*3*3, 1024)
         self.drop1 = torch.nn.Dropout(p=0.2)
         self.dense2 = nn.Linear(1024, 1024)
         self.drop2 = torch.nn.Dropout(p=0.2)
